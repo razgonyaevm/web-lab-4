@@ -14,18 +14,6 @@ const allHistoryPoints = ref([])
 const graphKey = ref(0) // Для принудительного перерендеринга графика
 const coordinateGraph = ref(null) // Ссылка на компонент графика
 
-// Временно отключаем computed filteredPoints полностью для диагностики
-// const filteredPoints = computed(() => {
-//   console.log('🏠 Computed filteredPoints DISABLED: returning all points')
-//   return allHistoryPoints.value
-// })
-// ВРЕМЕННО ОТКЛЮЧАЕМ computed filteredPoints для диагностики проблемы с логаутом
-// const filteredPoints = computed(() => {
-//   console.log('🏠 Computed filteredPoints: radius=', currentRadius.value, 'allPoints=', allHistoryPoints.value.length)
-//   const result = allHistoryPoints.value.filter(point => point.r === currentRadius.value)
-//   console.log('🏠 Filtered result:', result.length, 'points')
-//   return result
-// })
 
 // Фильтруем точки по выбранному радиусу
 const filteredPoints = computed(() => {
@@ -163,8 +151,8 @@ const handleHistoryCleared = () => {
 
 const loadHistory = async () => {
   try {
-    const history = await pointService.getHistory()
-    allHistoryPoints.value = Array.isArray(history) ? history : []
+    const response = await pointService.getHistory(1, 1000)
+    allHistoryPoints.value = Array.isArray(response.data) ? response.data : []
     points.value = allHistoryPoints.value
   } catch (error) {
     console.error('Ошибка при загрузке истории:', error.message)

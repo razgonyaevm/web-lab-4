@@ -8,10 +8,12 @@ import com.example.backend.repository.PointCheckRepository;
 import com.example.backend.service.PointCheckService;
 import com.example.backend.service.UserService;
 import jakarta.validation.Valid;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -47,24 +49,32 @@ public class PointController {
 
   @GetMapping("/history")
   @RateLimited
-  public Flux<PointCheckWithUser> getHistory(
-      @RequestParam(defaultValue = "50") int limit, @RequestParam(defaultValue = "0") long offset) {
+  public Mono<Map<String, Object>> getHistory(
+      @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "50") int pageSize) {
 
     // Validate parameters
-    if (limit <= 0 || limit > 1000) {
-      limit = 50; // Default limit
-    }
-    if (offset < 0) {
-      offset = 0;
-    }
+    final int validatedPage = Math.max(1, page);
+    final int validatedPageSize = (pageSize <= 0 || pageSize > 1000) ? 50 : pageSize;
+    final long offset = (validatedPage - 1L) * validatedPageSize;
 
-    return pointCheckRepository.findAllWithUsernameOrderByCheckTimeDesc(limit, offset);
-  }
+    return pointCheckRepository
+        .findAllWithUsernameOrderByCheckTimeDesc(validatedPageSize, offset)
+        .collectList()
+        .zipWith(pointCheckRepository.countAll())
+        .map(
+            tuple -> {
+              List<PointCheckWithUser> data = tuple.getT1();
+              Long totalCount = tuple.getT2();
 
-  @GetMapping("/history/count")
-  @RateLimited
-  public Mono<Long> getHistoryCount() {
-    return pointCheckRepository.countAll();
+              Map<String, Object> response = new HashMap<>();
+              response.put("data", data);
+              response.put("totalCount", totalCount);
+              response.put("page", validatedPage);
+              response.put("pageSize", validatedPageSize);
+              response.put("totalPages", (int) Math.ceil((double) totalCount / validatedPageSize));
+
+              return response;
+            });
   }
 
   @DeleteMapping("/history")

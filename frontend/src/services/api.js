@@ -164,29 +164,17 @@ export const pointService = {
         }
     },
 
-    async getHistory(limit = 50, offset = 0) {
-        console.log('📚 Fetching history with pagination...', { limit, offset }, '(CALLED FROM:', new Error().stack.split('\n')[2])
+    async getHistory(page = 1, pageSize = 50) {
+        console.log('Fetching history with pagination...', { page, pageSize }, '(CALLED FROM:', new Error().stack.split('\n')[2])
         try {
             const response = await apiClient.get('/api/points/history', {
-                params: { limit, offset }
+                params: { page, pageSize }
             })
             console.log('✅ History fetched successfully:', response.data)
             return response.data
         } catch (error) {
             console.log('❌ History fetch failed:', error)
             throw new Error(error.response?.data?.message || 'Failed to fetch history')
-        }
-    },
-
-    async getHistoryCount() {
-        console.log('🔢 Fetching history count...')
-        try {
-            const response = await apiClient.get('/api/points/history/count')
-            console.log('✅ History count fetched successfully:', response.data)
-            return response.data
-        } catch (error) {
-            console.log('❌ History count fetch failed:', error)
-            throw new Error(error.response?.data?.message || 'Failed to fetch history count')
         }
     },
 

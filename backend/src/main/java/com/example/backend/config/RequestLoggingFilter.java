@@ -1,5 +1,7 @@
 package com.example.backend.config;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -12,6 +14,8 @@ import reactor.core.publisher.Mono;
 @Order(Ordered.LOWEST_PRECEDENCE)
 public class RequestLoggingFilter implements WebFilter {
 
+  private static final Logger logger = LoggerFactory.getLogger(RequestLoggingFilter.class);
+
   @Override
   public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
     String method = exchange.getRequest().getMethod().name();
@@ -20,10 +24,7 @@ public class RequestLoggingFilter implements WebFilter {
     return chain
         .filter(exchange)
         .doOnSuccess(
-            v ->
-                System.out.println(
-                    method + " " + path + " - " + exchange.getResponse().getStatusCode()))
-        .doOnError(
-            e -> System.err.println("ERROR: " + method + " " + path + " - " + e.getMessage()));
+            v -> logger.info("{} {} - {}", method, path, exchange.getResponse().getStatusCode()))
+        .doOnError(e -> logger.error("Request failed: {} {} - {}", method, path, e.getMessage()));
   }
 }

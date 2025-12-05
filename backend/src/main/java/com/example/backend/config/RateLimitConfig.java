@@ -10,29 +10,20 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RateLimitConfig {
 
-  @Value("${rate-limit.requests-per-minute:60}")
-  private int requestsPerMinute;
+  private final Bucket bucket;
 
-  @Value("${rate-limit.burst-capacity:100}")
-  private int burstCapacity;
-
-  // Store bucket in memory for single instance
-  private volatile Bucket bucket;
+  public RateLimitConfig(
+      @Value("${rate-limit.requests-per-minute:60}") int requestsPerMinute,
+      @Value("${rate-limit.burst-capacity:100}") int burstCapacity) {
+    this.bucket =
+        Bucket.builder()
+            .addLimit(
+                Bandwidth.classic(
+                    burstCapacity, Refill.intervally(requestsPerMinute, Duration.ofMinutes(1))))
+            .build();
+  }
 
   public Bucket getBucket() {
-    if (bucket == null) {
-      synchronized (this) {
-        if (bucket == null) {
-          bucket =
-              Bucket.builder()
-                  .addLimit(
-                      Bandwidth.classic(
-                          burstCapacity,
-                          Refill.intervally(requestsPerMinute, Duration.ofMinutes(1))))
-                  .build();
-        }
-      }
-    }
     return bucket;
   }
 }

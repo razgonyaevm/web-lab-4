@@ -31,17 +31,12 @@ const loadResults = async (page = 0) => {
   loading.value = true
   error.value = ''
   try {
-    // Загружаем данные и количество параллельно
-    const [history, count] = await Promise.all([
-      pointService.getHistory(pageSize.value, page * pageSize.value),
-      pointService.getHistoryCount()
-    ])
+    const response = await pointService.getHistory(page + 1, pageSize.value)
 
-    console.log('✅ History loaded successfully:', history)
-    console.log('✅ Total count:', count)
+    console.log('History loaded successfully:', response)
 
-    results.value = Array.isArray(history) ? history : []
-    totalCount.value = count || 0
+    results.value = Array.isArray(response.data) ? response.data : []
+    totalCount.value = response.totalCount || 0
     currentPage.value = page
   } catch (err) {
     console.log('❌ Error loading history:', err)
