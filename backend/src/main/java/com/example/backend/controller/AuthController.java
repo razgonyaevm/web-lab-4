@@ -27,12 +27,12 @@ public class AuthController {
   @PostMapping("/login")
   public Mono<ApiResponse> login(@Valid @RequestBody AuthRequest request) {
     return userService
-        .authenticate(request.getUsername(), request.getPassword())
+        .authenticate(request.username(), request.password())
         .map(
             user -> {
-              String token = jwtService.generateToken(user.getUsername());
+              String token = jwtService.generateToken(user.username());
               return ApiResponse.success(
-                  "Login successful", new AuthResponse(token, user.getUsername()));
+                  "Login successful", new AuthResponse(token, user.username()));
             })
         .defaultIfEmpty(ApiResponse.error("Invalid username or password"));
   }
@@ -40,7 +40,7 @@ public class AuthController {
   @PostMapping("/register")
   public Mono<ApiResponse> register(@Valid @RequestBody AuthRequest request) {
     return userService
-        .register(request.getUsername(), request.getPassword())
+        .register(request.username(), request.password())
         .map(user -> ApiResponse.success("Registration successful"))
         .defaultIfEmpty(ApiResponse.error("Username already exists"));
   }

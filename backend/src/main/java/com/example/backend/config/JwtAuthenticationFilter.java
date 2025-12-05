@@ -57,7 +57,7 @@ public class JwtAuthenticationFilter implements WebFilter {
               .flatMap(
                   user -> {
                     UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(user.getUsername(), null, null);
+                        new UsernamePasswordAuthenticationToken(user.username(), null, null);
 
                     SecurityContext context = new SecurityContextImpl(authentication);
                     return chain

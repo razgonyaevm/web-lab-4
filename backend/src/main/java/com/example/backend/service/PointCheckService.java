@@ -21,7 +21,7 @@ public class PointCheckService {
           long executionTime = (endTime - startTime) / 100;
 
           return new PointCheck(
-              user.getId(),
+              user.id(),
               x.doubleValue(),
               y,
               r.doubleValue(),

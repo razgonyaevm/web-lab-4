@@ -33,7 +33,7 @@ public class UserService {
   public Mono<User> authenticate(String username, String plainPassword) {
     return userRepository
         .findByUsername(username)
-        .filter(user -> passwordEncoder.matches(plainPassword, user.getPassword()));
+        .filter(user -> passwordEncoder.matches(plainPassword, user.password()));
   }
 
   public Mono<User> findByUsername(String username) {

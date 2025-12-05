@@ -77,7 +77,7 @@ public class PointController {
         .flatMap(
             user ->
                 pointCheckRepository
-                    .findByUserId(user.getId())
+                    .findByUserId(user.id())
                     .collectList()
                     .flatMap(
                         pointChecks -> {
