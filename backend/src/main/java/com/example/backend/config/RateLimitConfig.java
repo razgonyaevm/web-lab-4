@@ -4,9 +4,12 @@ import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.Refill;
 import java.time.Duration;
+
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
+@Getter
 @Configuration
 public class RateLimitConfig {
 
@@ -23,7 +26,4 @@ public class RateLimitConfig {
             .build();
   }
 
-  public Bucket getBucket() {
-    return bucket;
-  }
 }
