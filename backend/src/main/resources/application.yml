@@ -19,7 +19,7 @@ logging:
     org.springframework.security: ${SPRING_LOG_LEVEL:WARN}
 
 rate-limit:
-  enabled: ${RATE_LIMIT_ENABLED:false}
+  enabled: ${RATE_LIMIT_ENABLED:true}
   requests-per-minute: ${RATE_LIMIT_REQUESTS:60}
   burst-capacity: ${RATE_LIMIT_BURST:100}
 
