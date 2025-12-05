@@ -1,8 +1,9 @@
 package com.example.backend.config;
 
-import com.example.backend.dto.ApiResponse;
 import java.util.HashMap;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -15,9 +16,12 @@ import org.springframework.web.bind.support.WebExchangeBindException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+  private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
   @ExceptionHandler(WebExchangeBindException.class)
-  public ResponseEntity<ApiResponse> handleValidationExceptions(WebExchangeBindException ex) {
-    System.out.println("GlobalExceptionHandler: Validation failed");
+  public ResponseEntity<Map<String, Object>> handleValidationExceptions(
+      WebExchangeBindException ex) {
+    logger.warn("Validation failed for request: {}", ex.getMessage());
     Map<String, String> errors = new HashMap<>();
     ex.getBindingResult()
         .getAllErrors()
@@ -25,43 +29,57 @@ public class GlobalExceptionHandler {
             (error) -> {
               String fieldName = ((FieldError) error).getField();
               String errorMessage = error.getDefaultMessage();
-              System.out.println(
-                  "GlobalExceptionHandler: Field '" + fieldName + "' - " + errorMessage);
+              logger.warn("Validation error - Field '{}' - {}", fieldName, errorMessage);
               errors.put(fieldName, errorMessage);
             });
 
-    // Возвращаем первую ошибку вместо "Validation failed"
-    String errorMessage =
-        errors.isEmpty() ? "Validation failed" : errors.values().iterator().next();
-    return ResponseEntity.badRequest().body(ApiResponse.error(errorMessage, errors));
+    Map<String, Object> response = new HashMap<>();
+    response.put("success", false);
+    response.put(
+        "message", errors.isEmpty() ? "Validation failed" : errors.values().iterator().next());
+    response.put("errors", errors);
+
+    return ResponseEntity.badRequest().body(response);
   }
 
   @ExceptionHandler(BadCredentialsException.class)
-  public ResponseEntity<ApiResponse> handleBadCredentials(BadCredentialsException ex) {
-    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-        .body(ApiResponse.error("Invalid username or password"));
+  public ResponseEntity<Map<String, Object>> handleBadCredentials(BadCredentialsException ex) {
+    logger.warn("Bad credentials attempt: {}", ex.getMessage());
+    Map<String, Object> response = new HashMap<>();
+    response.put("success", false);
+    response.put("message", "Invalid username or password");
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
   }
 
   @ExceptionHandler(AccessDeniedException.class)
-  public ResponseEntity<ApiResponse> handleAccessDenied(AccessDeniedException ex) {
-    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error("Access denied"));
+  public ResponseEntity<Map<String, Object>> handleAccessDenied(AccessDeniedException ex) {
+    logger.warn("Access denied: {}", ex.getMessage());
+    Map<String, Object> response = new HashMap<>();
+    response.put("success", false);
+    response.put("message", "Access denied");
+    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
   }
 
   @ExceptionHandler(RateLimitExceededException.class)
-  public ResponseEntity<ApiResponse> handleRateLimitExceeded(RateLimitExceededException ex) {
+  public ResponseEntity<Map<String, Object>> handleRateLimitExceeded(
+      RateLimitExceededException ex) {
+    logger.warn("Rate limit exceeded, retry after {} seconds", ex.getWaitForRefill());
+    Map<String, Object> response = new HashMap<>();
+    response.put("success", false);
+    response.put(
+        "message",
+        "Сервер перегружен запросами. Попробуйте через " + ex.getWaitForRefill() + " секунд.");
     return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
         .header("X-Rate-Limit-Retry-After-Seconds", String.valueOf(ex.getWaitForRefill()))
-        .body(
-            ApiResponse.error(
-                "Сервер перегружен запросами. Попробуйте через "
-                    + ex.getWaitForRefill()
-                    + " секунд."));
+        .body(response);
   }
 
   @ExceptionHandler(Exception.class)
-  public ResponseEntity<ApiResponse> handleGenericException(Exception ex) {
-    ex.printStackTrace(); // Log for debugging
-    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .body(ApiResponse.error("Internal server error"));
+  public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex) {
+    logger.error("Unexpected error occurred", ex);
+    Map<String, Object> response = new HashMap<>();
+    response.put("success", false);
+    response.put("message", "Internal server error");
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
   }
 }

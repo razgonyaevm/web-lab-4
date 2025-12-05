@@ -6,6 +6,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Aspect
@@ -14,7 +15,7 @@ public class RateLimitAspect {
 
   @Autowired private RateLimitConfig rateLimitConfig;
 
-  @org.springframework.beans.factory.annotation.Value("${rate-limit.enabled:false}")
+  @Value("${rate-limit.enabled:false}")
   private boolean rateLimitEnabled;
 
   @Around("@annotation(com.example.backend.config.RateLimited)")
