@@ -18,7 +18,7 @@ export const useAuthStore = defineStore('auth', () => {
         error.value = null
         try {
             const response = await authService.login(username, password)
-            if (response.success && response.data?.token) {
+            if (response.data?.token) {
                 const authData = response.data
                 token.value = authData.token
                 user.value = { username: authData.username }
@@ -28,10 +28,17 @@ export const useAuthStore = defineStore('auth', () => {
                     user: { username: authData.username }
                 }))
                 return true
+            } else {
+                // Если токена нет, но запрос успешен - это ошибка
+                error.value = response.message || 'Login failed'
+                return false
             }
-            return false
         } catch (err) {
-            error.value = err.message
+            if (err.response?.data?.message) {
+                error.value = err.response.data.message
+            } else {
+                error.value = err.message || 'Login failed'
+            }
             return false
         } finally {
             loading.value = false
@@ -43,9 +50,13 @@ export const useAuthStore = defineStore('auth', () => {
         error.value = null
         try {
             const response = await authService.register(username, password)
-            return response.success
+            return true
         } catch (err) {
-            error.value = err.message
+            if (err.response?.data?.message) {
+                error.value = err.response.data.message
+            } else {
+                error.value = err.message || 'Registration failed'
+            }
             return false
         } finally {
             loading.value = false

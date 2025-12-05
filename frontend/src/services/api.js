@@ -59,6 +59,12 @@ apiClient.interceptors.response.use(
         console.log('❌ API Error:', error.config?.method?.toUpperCase(), error.config?.url, '- Status:', error.response?.status, '- Message:', error.message)
 
         if (error.response?.status === 401) {
+            // Не обрабатываем 401 для auth endpoints - это бизнес-логика, а не потеря аутентификации
+            if (error.config?.url?.includes('/api/auth/')) {
+                console.log('🚫 401 on auth endpoint - letting component handle it')
+                return Promise.reject(error)
+            }
+
             console.log('🚫 401 Unauthorized received!')
             console.log('🚫 Request URL:', error.config?.url)
             console.log('🚫 Request method:', error.config?.method)
@@ -67,7 +73,7 @@ apiClient.interceptors.response.use(
             console.log('🚫 Stack trace:', new Error().stack)
 
             console.log('🚫 401 Unauthorized - clearing auth data')
-            localStorage.removeItem('user')  // Исправлено: удаляем 'user' вместо 'auth'
+            localStorage.removeItem('auth')
 
             console.log('🔄 Redirecting to login page due to 401')
             window.location.replace('/')
@@ -104,22 +110,6 @@ export const authService = {
             console.log('Error response status:', error.response?.status)
             console.log('Error response data:', error.response?.data)
             const errorData = error.response?.data
-            console.log('Extracted errorData:', errorData)
-            console.log('errorData.message:', errorData?.message)
-            console.log('errorData.data:', errorData?.data)
-
-            if (error.response?.status === 400 && errorData?.data && typeof errorData.data === 'object') {
-                console.log('Validation errors detected, returning error object')
-                const resultObject = {
-                    success: false,
-                    message: errorData.message || 'Validation failed',
-                    fieldErrors: errorData.data
-                }
-                console.log('authService.login - about to return validation error object:', resultObject)
-                // Возвращаем объект с ошибками вместо исключения
-                return resultObject
-            }
-            // Для других ошибок выбрасываем исключение
             throw new Error(errorData?.message || 'Login failed')
         }
     },
@@ -132,20 +122,6 @@ export const authService = {
             console.log('Register API error:', error)
             console.log('Error response:', error.response)
             const errorData = error.response?.data
-            console.log('Error data:', errorData)
-
-            if (error.response?.status === 400 && errorData?.data && typeof errorData.data === 'object') {
-                console.log('Validation errors detected, returning error object')
-                const resultObject = {
-                    success: false,
-                    message: errorData.message || 'Validation failed',
-                    fieldErrors: errorData.data
-                }
-                console.log('authService.login - about to return validation error object:', resultObject)
-                // Возвращаем объект с ошибками вместо исключения
-                return resultObject
-            }
-            // Для других ошибок выбрасываем исключение
             throw new Error(errorData?.message || 'Registration failed')
         }
     }

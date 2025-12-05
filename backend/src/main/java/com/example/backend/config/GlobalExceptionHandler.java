@@ -1,5 +1,6 @@
 package com.example.backend.config;
 
+import com.example.backend.dto.ApiResponse;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -19,8 +20,7 @@ public class GlobalExceptionHandler {
   private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
   @ExceptionHandler(WebExchangeBindException.class)
-  public ResponseEntity<Map<String, Object>> handleValidationExceptions(
-      WebExchangeBindException ex) {
+  public ResponseEntity<ApiResponse> handleValidationExceptions(WebExchangeBindException ex) {
     logger.warn("Validation failed for request: {}", ex.getMessage());
     Map<String, String> errors = new HashMap<>();
     ex.getBindingResult()
@@ -33,53 +33,39 @@ public class GlobalExceptionHandler {
               errors.put(fieldName, errorMessage);
             });
 
-    Map<String, Object> response = new HashMap<>();
-    response.put("success", false);
-    response.put(
-        "message", errors.isEmpty() ? "Validation failed" : errors.values().iterator().next());
-    response.put("errors", errors);
-
-    return ResponseEntity.badRequest().body(response);
+    String message = errors.isEmpty() ? "Validation failed" : errors.values().iterator().next();
+    return ResponseEntity.badRequest().body(ApiResponse.error(message));
   }
 
   @ExceptionHandler(BadCredentialsException.class)
-  public ResponseEntity<Map<String, Object>> handleBadCredentials(BadCredentialsException ex) {
+  public ResponseEntity<ApiResponse> handleBadCredentials(BadCredentialsException ex) {
     logger.warn("Bad credentials attempt: {}", ex.getMessage());
-    Map<String, Object> response = new HashMap<>();
-    response.put("success", false);
-    response.put("message", "Invalid username or password");
-    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+        .body(ApiResponse.error("Invalid username or password"));
   }
 
   @ExceptionHandler(AccessDeniedException.class)
-  public ResponseEntity<Map<String, Object>> handleAccessDenied(AccessDeniedException ex) {
+  public ResponseEntity<ApiResponse> handleAccessDenied(AccessDeniedException ex) {
     logger.warn("Access denied: {}", ex.getMessage());
-    Map<String, Object> response = new HashMap<>();
-    response.put("success", false);
-    response.put("message", "Access denied");
-    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error("Access denied"));
   }
 
   @ExceptionHandler(RateLimitExceededException.class)
-  public ResponseEntity<Map<String, Object>> handleRateLimitExceeded(
-      RateLimitExceededException ex) {
+  public ResponseEntity<ApiResponse> handleRateLimitExceeded(RateLimitExceededException ex) {
     logger.warn("Rate limit exceeded, retry after {} seconds", ex.getWaitForRefill());
-    Map<String, Object> response = new HashMap<>();
-    response.put("success", false);
-    response.put(
-        "message",
-        "Сервер перегружен запросами. Попробуйте через " + ex.getWaitForRefill() + " секунд.");
     return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
         .header("X-Rate-Limit-Retry-After-Seconds", String.valueOf(ex.getWaitForRefill()))
-        .body(response);
+        .body(
+            ApiResponse.error(
+                "Сервер перегружен запросами. Попробуйте через "
+                    + ex.getWaitForRefill()
+                    + " секунд."));
   }
 
   @ExceptionHandler(Exception.class)
-  public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex) {
+  public ResponseEntity<ApiResponse> handleGenericException(Exception ex) {
     logger.error("Unexpected error occurred", ex);
-    Map<String, Object> response = new HashMap<>();
-    response.put("success", false);
-    response.put("message", "Internal server error");
-    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .body(ApiResponse.error("Internal server error"));
   }
 }

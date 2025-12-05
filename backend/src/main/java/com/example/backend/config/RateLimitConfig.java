@@ -4,7 +4,6 @@ import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.Refill;
 import java.time.Duration;
-
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -25,5 +24,4 @@ public class RateLimitConfig {
                     burstCapacity, Refill.intervally(requestsPerMinute, Duration.ofMinutes(1))))
             .build();
   }
-
 }
