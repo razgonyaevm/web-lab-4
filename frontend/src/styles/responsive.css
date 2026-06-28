@@ -1,0 +1,333 @@
+/* Переменные для брейкпоинтов */
+:root {
+    --desktop-min: 1047px;
+    --tablet-min: 673px;
+    --tablet-max: 1046px;
+    --mobile-max: 672px;
+}
+
+/* Общие стили */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+    margin: 0;
+    color: #2c3e50;
+}
+
+.container {
+    width: 100%;
+    padding: 20px;
+}
+
+/* Десктопный режим (≥1047px) */
+@media (min-width: 1047px) {
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .main-layout {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 30px;
+        align-items: start;
+    }
+
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .graph-container {
+        width: 500px;
+        height: 500px;
+    }
+}
+
+/* Планшетный режим (673px - 1046px) */
+@media (min-width: 673px) and (max-width: 1046px) {
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .main-layout {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .header-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+    }
+
+    .graph-container {
+        width: 400px;
+        height: 400px;
+        margin: 0 auto;
+    }
+}
+
+/* Мобильный режим (≤672px) */
+@media (max-width: 672px) {
+    .container {
+        padding: 10px;
+    }
+
+    .main-layout {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .header-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+    }
+
+    .graph-container {
+        width: 300px;
+        height: 300px;
+        margin: 0 auto;
+        transform: scale(0.9);
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* Компоненты */
+.card {
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px);
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+    margin-bottom: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+}
+
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
+    box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+}
+
+.btn-secondary:hover {
+    background: linear-gradient(135deg, #e55a5a 0%, #d44a42 100%);
+    box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
+    transform: translateY(-2px);
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.form-input {
+    width: 100%;
+    padding: 15px 20px;
+    border: 2px solid rgba(79, 70, 229, 0.2);
+    border-radius: 12px;
+    font-size: 16px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    color: #2c3e50;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #4f46e5;
+    box-shadow: 0 0 20px rgba(79, 70, 229, 0.2);
+    background: rgba(255, 255, 255, 1);
+}
+
+.form-input.error {
+    border-color: #ef4444;
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
+}
+
+.form-input::placeholder {
+    color: #999;
+    font-style: italic;
+}
+
+.field-error {
+    color: #f44336;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+.error-message {
+    color: #f44336;
+    background-color: #ffebee;
+    padding: 10px;
+    border-radius: 4px;
+    margin: 10px 0;
+    text-align: center;
+}
+
+.success-message {
+    color: #4CAF50;
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(139, 195, 74, 0.1) 100%);
+    padding: 15px 20px;
+    border-radius: 12px;
+    margin: 15px 0;
+    text-align: center;
+    border: 1px solid rgba(76, 175, 80, 0.3);
+    backdrop-filter: blur(10px);
+}
+
+/* Красивые чекбоксы */
+.checkbox-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 12px;
+    margin-top: 15px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    border: 2px solid rgba(79, 70, 229, 0.2);
+    transition: all 0.3s ease;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.checkbox-label:hover {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: #4f46e5;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.15);
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #4f46e5;
+    cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"]:checked + span {
+    color: #4f46e5;
+    font-weight: 700;
+}
+
+/* Анимации для загрузки */
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #667eea;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Адаптивные улучшения */
+@media (max-width: 672px) {
+    .card {
+        padding: 20px;
+        margin-bottom: 15px;
+    }
+
+    .btn {
+        padding: 14px 20px;
+        font-size: 14px;
+    }
+
+    .form-input {
+        padding: 12px 16px;
+        font-size: 16px;
+    }
+
+    .checkbox-group {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
+
+    .checkbox-label {
+        padding: 10px 12px;
+        font-size: 14px;
+    }
+}

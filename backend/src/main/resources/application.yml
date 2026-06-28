@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: backend
+  webflux:
+    static-path-pattern: /**
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+  r2dbc:
+    url: ${DATABASE_URL:r2dbc:postgresql://localhost:5432/studs}
+    username: ${DATABASE_USERNAME:s467211}
+    password: ${DATABASE_PASSWORD}
+
+logging:
+  level:
+    com.example.backend: ${LOG_LEVEL:DEBUG}
+    org.springframework.r2dbc: ${SPRING_LOG_LEVEL:WARN}
+    org.springframework.security: ${SPRING_LOG_LEVEL:WARN}
+
+rate-limit:
+  enabled: ${RATE_LIMIT_ENABLED:true}
+  requests-per-minute: ${RATE_LIMIT_REQUESTS:60}
+  burst-capacity: ${RATE_LIMIT_BURST:100}
+
+server:
+  port: ${SERVER_PORT:8308}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: ${HEALTH_SHOW_DETAILS:when-authorized}
+
+
